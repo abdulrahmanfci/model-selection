@@ -82,15 +82,8 @@ for(m in 1:length(ssize)){
         #cat("\nprint j:",j,l,iteration,"\n")
       }
       
-      #cat("\n",as.character(Sys.time()))
-      
-      #start = (l-1)*iteration
-      #end = l*iteration
-      #cat("\n start:",start," ",end," ",iteration,"\n")
-      
-      xls=unlist(xls);x2ls=unlist(x2ls); yls=unlist(yls)
-      #cat("\n yls",length(yls)," ",tail(yls))
-      
+     
+      xls=unlist(xls);x2ls=unlist(x2ls); yls=unlist(yls)      
       if(k == 1){
         #was sum
         mse=mean( (yls-mean(yls))^2 )
@@ -107,9 +100,6 @@ for(m in 1:length(ssize)){
         
         mse2 = sumtc/(intervention*osize)
         lsmse2 = c(lsmse2,mse2)
-        # if(m>=7){
-        # cat("mse in 1:",m," ",k," ",l," ",mse,mean(yls)," ",sum(yls-mean(yls)),"\n")
-        # }
         
       }
       else{
@@ -125,14 +115,12 @@ for(m in 1:length(ssize)){
            sumtc <- sumtc+(yls_origin[((i-1)*osize+j)]-p[i])^2
            intvar = c(intvar,(yls_origin[((i-1)*osize+j)]-p[i])^2)
           }
-          #cat("\n",mean(unlist(intvar))," ",sd(unlist(intvar)) )
-          #cat("\nprint j:",i,j,sumtc,"\n")
+         
         }
         #was sum
         mse=mean( (fit$residuals^2))
         lsmse = c(lsmse,mse)
-        #print(mse)
-        #print(p)
+        
         mse2 = sumtc/(intervention*osize)
         lsmse2 = c(lsmse2,mse2)
         
@@ -149,6 +137,10 @@ for(m in 1:length(ssize)){
 
 library(ggplot2)
 library(reshape2)
+library(data.table)
+library(tidyverse)
+library(directlabels)
+
 mseres21 <- mseres[1:4,]
 mseres22 <- mseres[5:11,]
 df <- data.frame(mseres22)
@@ -157,48 +149,23 @@ rowname <- c(500,800,1000,1500,2000,4000,6000)
 rownames(df) <- c(500,800,1000,1500,2000,4000,6000)
 colnames(df) <- mnames
 
-library(data.table)
-library(tidyverse)
-library(directlabels)
 
-
-df2 <- t(df) #transpose(df)
-
-# get row and colnames in order
-#colnames(df2) <- rownames(df)
-#rownames(df2) <- colnames(df)
 df2 <- data.frame(df2)
-#colnames(df2) <- c(rownames(df)[1:5])
-colnames = c('x100','x200','x300','x400','x500','x800','x1000','x2000')
-df2['model'] <- colnames(df)
+
 
 colnames(df2) <- colnames
 df2 <- df2[,-c(6)]
 
 
-#df2 <-df2 %>% pivot_longer(cols = c(X100, X200, X300,X400,X500),
-#                                       names_to = "SampleSize")
-df <- df[,-c(1)]
-#colnames(df) <- c('m1','m2','m3','m4','m5')
-
-#df['rows'] <- c('s1_100','s2_200','s3_300','s4_400')
-#df['rows'] <- c('s5_500','s7_800','s8_1000','s9_1500', 'ss_2000')
-#colnames(df)[7] <- 'm8'
 df['rows'] <- rownames(df)
 df <-df %>% pivot_longer(cols = c(m0, m1,m2, m3, m4,m5),
                          names_to = "model")
 
-#df.m <- melt(df)
-#color-blind palette
-#cbbPalette <- c("#000000", "#E69F00", "#56B4E9", "#009E73", "#F0E442", "#0072B2", "#D55E00", "#CC79A7")
-#previously it was geom_point(aes(shape=model)) without scale_color_discrete
+
 ggplot(df, aes(rows, value, col=model, group=model)) +
   geom_line() +  #geom_line(aes(linetype=model))
   geom_point(aes(shape=model))+
-  #scale_linetype_manual( values = unique(model))+
-  #scale_fill_manual() +
   theme(legend.position = c(0.8, 0.8),legend.title=element_text(size=14)) +
-  #scale_x_discrete(limits=df$rows)+
   ylab("MSE")+ xlab("Sample size") + lims(x=df$rows)+
   scale_color_discrete(name="Model",labels = c(expression(y==beta[0]+beta[1]*x[1]+beta[2]*x[2]+beta[3], 
                                                           y==beta[0]+beta[1]*x[1]+beta[2]*x[2]+beta[3], 
@@ -213,19 +180,4 @@ scale_shape_discrete(name="Model",labels = c(expression(y==beta[0]+beta[1]*x[1]+
                                                         y==beta[0]+beta[1]*x[1]+beta[2]*x[2]+beta[3],
                                                         y==beta[0])))
 
-#theme(axis.text.x = element_text(angle = 90, 
-#                                 hjust = 1,
-#                                 vjust = 0.5))
 
-
-mseresavg <- mseres
-mseallavg <- mseall
-mseresavgm7 <- mseres
-mseallavgm7 <- mseall
-for(i in 1:length(mseall)){
-  cat("\nhello: ",i," ",sd(mseall[i,]))
-}
-
-mseresold <- mseres
-mseallold <- mseall
-mseres2
